@@ -1,0 +1,218 @@
+@startuml design_uml
+
+package Question_Back_Service_Frontend {
+	class User {
+		+ username: String
+		- password: String
+		+ email: String
+		+ userType: UserType
+		+ credits: int
+		+ profilePicture(): bin
+		+ register(): void
+		+ login(): void
+		+ viewAccessibleQuestions(): void
+		+ Create()
+		+ Read()
+		+ Update()
+		+ Delete()
+		+ addQuestion(): void
+		+ viewQuestions(): void
+	}
+
+	class Question {
+		+ questionText: String
+		+ tags: List<String>
+		+ difficultyLevel: int
+		+ explanation: String
+		+ correctOption: str
+		+ image: bin
+
+		+ extractQuestion(): void
+		+ addToDownloadList(Question): void
+	}
+
+	class QuestionViewSystem {
+		+ question: Question
+
+		+ extractQuestion(): void
+		+ addToDownloadList(Question): void
+		+ removeFromDownloadList(Question): void
+		+ navigateToNextQuestion()
+		+ navigateToPreviousQuestion()
+		+ toggleImageSize()
+	}
+
+	class QuestionBank {
+		- questionList: List<Question>
+		+ addQuestion()
+		+ searchQuestions()
+		+ downloadQuestions()
+		+ automaticTagSuggestion(): void
+	}
+
+	class AuthenticationManager {
+		+ authenticateUser(): void
+		+ authorizeUser(): void
+		+ authenticateUsing3rdPartyService(): void
+		+ notifyAuthentication(): void
+		+ SignUpUserUsingEmailAndPassword(): void
+		+ SignUpUserUsing3rdPartyService(): void
+	}
+
+	class SearchSystem {
+		+ searchResults(): void
+		+ searchSelectionParameters: List<int>
+		+ numEntriesPerPage: int
+		+ tagsSelected: List<Tag>
+		+ difficultySelected: enum
+		+ retrieveQuestionsByTag(): void
+		+ retrieveQuestionsByDifficulty(): void
+		+ retrieveQuestionsByTagAndDifficulty(): void
+		+ retrieveQuestionsByContributorEmail(): void
+		+ addTagInSearchQuery()
+		+ RemoveTagFromSearchQuery()
+		+ setNumEntriesPerPage()
+		+ NavigateToPage()
+	}
+
+	class Profile {
+		+ userEmail: str
+		+ userCredits: int
+		+ profilePicture: bin
+
+		+ changePassword(oldPassword: str, newPassword: str): void
+		+ getAccessToken()
+		+ celebrateEasterEgg(): void
+	}
+
+	class TagSystem {
+		+ Tags: enum
+
+		+ assignTag(): void
+		+ retrieveQuestionsByTag(): void
+		+ multidimensionalTagClassification(): void
+		+ ListAllTags()
+		+ AutocompleteTag()
+	}
+
+
+	enum UserType {
+		Admin
+		Contributor
+		GeneralStudent
+		Professor
+	}
+
+	enum Difficulty {
+		Easy
+		Medium
+		Hard
+	}
+
+	QuestionBank "1" *-- "1..*" Question
+	User "1..*" -- "1" QuestionBank
+	User "1" -- "1" AuthenticationManager
+	QuestionBank "1" *-- "1" SearchSystem
+	QuestionBank "1" -- "1" TagSystem
+	QuestionBank "1" *-- "1" AuthenticationManager
+	QuestionBank "1" *-- "1" QuestionViewSystem
+	QuestionBank "1" *-- "1" Profile
+
+	class QuestionUploadSystem {
+		- questionStatement : str
+		- options : List<str>
+		- explanations : List<str>
+		- tags : List<str>
+		- image : bin
+		- difficulty : enum
+		- correctOption : enum
+
+		+ uploadQuestion()
+		+ updateQuestionStatement()
+		+ updateOptions()
+		+ updateExplanations()
+		+ setCorrectOption()
+		+ changeCorrectOption()
+		+ addImage()
+		+ changeImage()
+		+ removeImage()
+		+ checkAllInput()
+		+ previewQuestion()
+	}
+
+	QuestionBank "1" *-- "1" QuestionUploadSystem
+	QuestionUploadSystem "1" -- "1" TagSystem
+
+	class DownloadList {
+		- questions: List<Question>
+		-/ totalQuestions: int
+		+ addQuestion(Question): void
+		+ removeQuestion(Question): void
+		+ downloadQuestionsAsJSON(): void
+	}
+
+	QuestionBank "1" *-- "1" DownloadList
+	DownloadList "1" *-- "1..*" Question
+}
+
+package Question_Back_Service_Backend {
+	class QuestionAPI_System {
+		- accessToken: str
+		- endpoints: List<str>
+		- questionJSON: json
+
+		+ send_request_to_server()
+		+ receive_request_from_frontend()
+		+ send_response_to_frontend()
+		+ exportQuestion(): void
+		+ importQuestion(): void
+		+ getAccessToken(): str
+	}
+
+	class ValidatorLayer {
+		- validators: List<obj>
+
+		+ applyValidator(validator)
+		+ addNewValidator()
+		+ removeValidator()
+	}
+
+	QuestionAPI_System "1" -- "1" ValidatorLayer: interacts with
+
+}
+
+package Firebase {
+	class FirebaseStorage {
+		+ content: db
+		+ num_folders: 
+
+		+ uploadBytes(bytes): void
+		+ retrieveData(path)
+		+ generateLink(data)
+	}
+
+	class FirebaseDatabase  {
+		+ collections: List<List>
+		+ num_collections
+
+		+ addToCollection()
+		+ getFromCollection()
+	}
+
+}
+package GoogleAuthentication {
+	class Authentication {
+		+ state: bool 
+
+		+ login_user()
+		+ signup_user()
+	}
+
+}
+
+QuestionBank "1" --> "1" QuestionAPI_System: "uses"
+Question_Back_Service_Backend "1" --> "1" Firebase: sends and receives data from
+
+GoogleAuthentication "1" <-- "1" AuthenticationManager: uses
+
+@enduml
